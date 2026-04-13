@@ -2,9 +2,9 @@ import { Elysia, t } from "elysia";
 import { registerUser, loginUser, logoutUser } from "../service/user-service";
 import { authPlugin } from "../plugins/auth-plugin";
 
-export const userRoute = new Elysia({ prefix: "/api" })
+export const userRoute = new Elysia({ prefix: "/api/users" })
   .use(authPlugin)
-  .post("/users", async ({ body, set }) => {
+  .post("/", async ({ body, set }) => {
     try {
       const result = await registerUser(body);
       return result;
@@ -23,7 +23,7 @@ export const userRoute = new Elysia({ prefix: "/api" })
       password: t.String()
     })
   })
-  .post("/users/login", async ({ body, set }) => {
+  .post("/login", async ({ body, set }) => {
     try {
       const result = await loginUser(body);
       return result;
@@ -41,18 +41,18 @@ export const userRoute = new Elysia({ prefix: "/api" })
       password: t.String()
     })
   })
-  .get("/users/current", async ({ user }) => {
+  .get("/current", async ({ user }) => {
     return { data: user };
   }, {
     auth: true
   })
-  .delete("/users/logout", async ({ token }) => {
+  .delete("/logout", async ({ token }) => {
     try {
       await logoutUser(token);
       return { data: "OK" };
     } catch (error: any) {
       if (error.message === "unauthorized") {
-        throw error; // Let the macro handle it if needed, but here it should already be validated
+        throw error;
       }
       return { error: "Terjadi kesalahan pada server" };
     }
