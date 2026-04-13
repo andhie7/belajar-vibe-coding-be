@@ -3,7 +3,18 @@ import { users, sessions } from "../db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
-export const registerUser = async (payload: any) => {
+interface RegisterPayload {
+  name: string;
+  email: string;
+  password: string;
+}
+
+interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+export const registerUser = async (payload: RegisterPayload) => {
   const { name, email, password } = payload;
 
   // Check if email already exists
@@ -28,7 +39,7 @@ export const registerUser = async (payload: any) => {
   return { data: "ok" };
 };
 
-export const loginUser = async (payload: any) => {
+export const loginUser = async (payload: LoginPayload) => {
   const { email, password } = payload;
 
   // Find user by email
@@ -85,4 +96,16 @@ export const getCurrentUser = async (token: string) => {
     email: user.email,
     created_at: user.createdAt,
   };
+};
+
+export const logoutUser = async (token: string) => {
+  // Delete session and check if anything was deleted in one query
+  const deleted = await db
+    .delete(sessions)
+    .where(eq(sessions.token, token))
+    .returning();
+
+  if (deleted.length === 0) {
+    throw new Error("unauthorized");
+  }
 };

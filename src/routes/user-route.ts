@@ -1,7 +1,9 @@
 import { Elysia, t } from "elysia";
-import { registerUser, loginUser, getCurrentUser } from "../service/user-service";
+import { registerUser, loginUser, logoutUser } from "../service/user-service";
+import { authPlugin } from "../plugins/auth-plugin";
 
 export const userRoute = new Elysia({ prefix: "/api" })
+  .use(authPlugin)
   .post("/users", async ({ body, set }) => {
     try {
       const result = await registerUser(body);
@@ -39,23 +41,21 @@ export const userRoute = new Elysia({ prefix: "/api" })
       password: t.String()
     })
   })
-  .get("/users/current", async ({ headers, set }) => {
+  .get("/users/current", async ({ user }) => {
+    return { data: user };
+  }, {
+    auth: true
+  })
+  .delete("/users/logout", async ({ token }) => {
     try {
-      const authorization = headers.authorization;
-      if (!authorization || !authorization.startsWith("Bearer ")) {
-        set.status = 401;
-        return { error: "unauthorized" };
-      }
-
-      const token = authorization.replace("Bearer ", "");
-      const result = await getCurrentUser(token);
-      return { data: result };
+      await logoutUser(token);
+      return { data: "OK" };
     } catch (error: any) {
       if (error.message === "unauthorized") {
-        set.status = 401;
-        return { error: "unauthorized" };
+        throw error; // Let the macro handle it if needed, but here it should already be validated
       }
-      set.status = 500;
       return { error: "Terjadi kesalahan pada server" };
     }
+  }, {
+    auth: true
   });
