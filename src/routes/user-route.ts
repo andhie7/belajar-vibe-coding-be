@@ -18,9 +18,9 @@ export const userRoute = new Elysia({ prefix: "/api/users" })
     }
   }, {
     body: t.Object({
-      name: t.String(),
-      email: t.String(),
-      password: t.String()
+      name: t.String({ maxLength: 255, error: "name tidak boleh lebih dari 255 karakter" }),
+      email: t.String({ maxLength: 255, error: "email tidak boleh lebih dari 255 karakter" }),
+      password: t.String({ maxLength: 255, error: "password tidak boleh lebih dari 255 karakter" })
     })
   })
   .post("/login", async ({ body, set }) => {
@@ -37,8 +37,8 @@ export const userRoute = new Elysia({ prefix: "/api/users" })
     }
   }, {
     body: t.Object({
-      email: t.String(),
-      password: t.String()
+      email: t.String({ maxLength: 255, error: "email tidak boleh lebih dari 255 karakter" }),
+      password: t.String({ maxLength: 255, error: "password tidak boleh lebih dari 255 karakter" })
     })
   })
   .get("/current", async ({ user }) => {
