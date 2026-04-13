@@ -1,8 +1,10 @@
 import { Elysia } from "elysia";
 import { db } from "./db";
+import { userRoute } from "./routes/user-route";
 
 const app = new Elysia()
   .get("/", () => "Hello Elysia from Bun!")
+  .use(userRoute)
   .get("/users", async () => {
     try {
       const users = await db.query.users.findMany();
