@@ -58,3 +58,31 @@ export const loginUser = async (payload: any) => {
 
   return { data: token };
 };
+
+export const getCurrentUser = async (token: string) => {
+  // Find session
+  const session = await db.query.sessions.findFirst({
+    where: eq(sessions.token, token),
+  });
+
+  if (!session || !session.userId) {
+    throw new Error("unauthorized");
+  }
+
+  // Find user
+  const user = await db.query.users.findFirst({
+    where: eq(users.id, session.userId),
+  });
+
+  if (!user) {
+    throw new Error("unauthorized");
+  }
+
+  // Return user data (omit password)
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    created_at: user.createdAt,
+  };
+};
